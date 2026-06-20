@@ -13,14 +13,11 @@ def generar_datos():
     dataset_completo = []
     tiempo_actual = datetime.now()
 
-    # Generar 1000 iteraciones (ticks de tiempo)
     for i in range(1000):
-        # Simulamos que cada lectura ocurre con 2 segundos de diferencia
         tiempo_str = (tiempo_actual + timedelta(seconds=i*2)).strftime("%H:%M:%S")
         lecturas_del_tick = []
 
         for sensor in SENSORES:
-            # 8% de probabilidad de generar una anomalía por lectura
             if random.random() < 0.08:
                 temp = sensor["temp_base"] + random.uniform(sensor["variacion"] + 4, sensor["variacion"] + 12)
             else:
@@ -49,7 +46,6 @@ def generar_datos():
             
         dataset_completo.append(lecturas_del_tick)
 
-    # Exportar a un archivo físico
     with open('dataset_simulacion.json', 'w', encoding='utf-8') as f:
         json.dump(dataset_completo, f, indent=4)
         
