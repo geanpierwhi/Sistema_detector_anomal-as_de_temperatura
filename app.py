@@ -9,7 +9,6 @@ INDICE_SIMULACION = 0
 DATASET_HISTORIAL = {"esp32_01": [], "esp32_02": [], "esp32_03": []}
 
 def cargar_dataset_local():
-    """Lee el archivo generado y prepara los datos en memoria"""
     global DATASET_COMPLETO, INDICE_SIMULACION
     
     if not os.path.exists('dataset_simulacion.json'):
@@ -19,7 +18,6 @@ def cargar_dataset_local():
     with open('dataset_simulacion.json', 'r', encoding='utf-8') as f:
         DATASET_COMPLETO = json.load(f)
 
-    # Tomar los primeros 25 registros para que el gráfico no inicie vacío
     for i in range(25):
         if i < len(DATASET_COMPLETO):
             lecturas = DATASET_COMPLETO[i]
@@ -27,7 +25,6 @@ def cargar_dataset_local():
                 DATASET_HISTORIAL[lectura["id"]].append(lectura)
             INDICE_SIMULACION += 1
 
-# Ejecutar carga inicial antes de arrancar rutas
 cargar_dataset_local()
 
 @app.route('/')
@@ -44,14 +41,12 @@ def api_dataset_actualizar():
     """Retorna la siguiente lectura del archivo JSON simulando tiempo real"""
     global INDICE_SIMULACION
     
-    # Si la simulación termina de leer el archivo, vuelve a empezar (Loop infinito)
     if INDICE_SIMULACION >= len(DATASET_COMPLETO):
         INDICE_SIMULACION = 0 
         
     nuevas_lecturas = DATASET_COMPLETO[INDICE_SIMULACION]
     INDICE_SIMULACION += 1
     
-    # Actualizar la memoria del servidor para mantener congruencia
     for lectura in nuevas_lecturas:
         DATASET_HISTORIAL[lectura["id"]].append(lectura)
         if len(DATASET_HISTORIAL[lectura["id"]]) > 50:
