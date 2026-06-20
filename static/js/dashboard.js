@@ -2,10 +2,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const gridContenedor = document.getElementById("sensores-grid");
     const ctx = document.getElementById('temperaturaChart').getContext('2d');
     
-    const maxPuntosEnPantalla = 30; // Límite de puntos visibles simultáneamente en el gráfico
+    const maxPuntosEnPantalla = 30;
     const coloresDataset = ['#3498db', '#9b59b6', '#1abc9c'];
     
-    // Inicialización base de Chart.js
     let configuracionGrafico = {
         type: 'line',
         data: {
@@ -24,7 +23,6 @@ document.addEventListener("DOMContentLoaded", () => {
     
     let tempChart = new Chart(ctx, configuracionGrafico);
 
-    // Renderiza las tarjetas de estado del panel con la última información
     function actualizarTarjetasUI(datosSensores) {
         gridContenedor.innerHTML = ""; 
 
@@ -55,7 +53,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // Paso 1: Cargar el dataset inicial pre-poblado por Python
     async function cargarDatasetPrevio() {
         try {
             const respuesta = await fetch('/api/dataset/inicial');
@@ -64,11 +61,9 @@ document.addEventListener("DOMContentLoaded", () => {
             let sensorIds = Object.keys(datasetHistorial);
             if (sensorIds.length === 0) return;
 
-            // Mapear los tiempos basándonos en los registros del primer sensor disponible
             const primerSensorId = sensorIds[0];
             tempChart.data.labels = datasetHistorial[primerSensorId].map(registro => registro.hora);
 
-            // Inyectar las series completas de datos al gráfico por cada negocio
             sensorIds.forEach((id, index) => {
                 const listaLecturas = datasetHistorial[id];
                 const nombreNegocio = listaLecturas[0].negocio;
@@ -78,7 +73,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     label: nombreNegocio,
                     data: arrayTemperaturas,
                     borderColor: coloresDataset[index % coloresDataset.length],
-                    backgroundColor: coloresDataset[index % coloresDataset.length] + '15', // Transparencia
+                    backgroundColor: coloresDataset[index % coloresDataset.length] + '15',
                     borderWidth: 2,
                     fill: true,
                     tension: 0.3
@@ -87,7 +82,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
             tempChart.update();
 
-            // Extraer el último elemento de cada sensor para actualizar las tarjetas dinámicas iniciales
             const ultimosEstados = sensorIds.map(id => {
                 const registros = datasetHistorial[id];
                 return registros[registros.length - 1];
@@ -99,27 +93,22 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // Paso 2: Escuchar las actualizaciones periódicas en tiempo real
     async function simularFlujoTiempoReal() {
         try {
             const respuesta = await fetch('/api/dataset/actualizar');
             const nuevasLecturas = await respuesta.json();
             
-            // Actualizar el estado visual de los paneles
             actualizarTarjetasUI(nuevasLecturas);
 
-            // Agregar la estampa de tiempo al eje X del gráfico
             const horaActual = nuevasLecturas[0].hora;
             tempChart.data.labels.push(horaActual);
 
-            // Insertar el nuevo valor en cada serie correspondiente
             nuevasLecturas.forEach((sensor, index) => {
                 if (tempChart.data.datasets[index]) {
                     tempChart.data.datasets[index].data.push(sensor.temperatura);
                 }
             });
 
-            // Si los datos superan el límite configurado en pantalla, remover el elemento más antiguo (efecto scroll)
             if (tempChart.data.labels.length > maxPuntosEnPantalla) {
                 tempChart.data.labels.shift();
                 tempChart.data.datasets.forEach(dataset => {
@@ -134,10 +123,9 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // Orquestación del arranque del sistema
     async function inicializarMonitoreo() {
-        await cargarDatasetPrevio(); // Carga las lecturas pasadas simuladas
-        setInterval(simularFlujoTiempoReal, 2500); // Polling activo cada 2.5 segundos
+        await cargarDatasetPrevio(); 
+        setInterval(simularFlujoTiempoReal, 2500);
     }
 
     inicializarMonitoreo();
