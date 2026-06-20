@@ -1,5 +1,5 @@
 # Sistema Inteligente para Monitoreo y Detección de Anomalías de Temperatura
-### Simulación educativa con ESP32 (sin hardware ni base de datos)
+### Simulación educativa con ESP32
 
 ## Requisitos
 - Python 3.8 o superior
